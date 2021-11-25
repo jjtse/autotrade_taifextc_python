@@ -1,4 +1,4 @@
-﻿import os
+import os
 import time
 from tcoreapi_mq import *
 import threading
@@ -156,10 +156,11 @@ def searchQty(arrInfo):
 def strategy(overweight_list, overweight_pz):
     while True:
         global RealTimePrice
-        if RealTimePrice >= overweight_list[overweight_pz]:  # 依照目前部位大小從理論價陣列[index]判斷
+        global trigger_queue
+        if RealTimePrice >= overweight_list[overweight_pz] and trigger_queue.qsize() == 0:  # 依照目前部位大小從理論價陣列[index]判斷
             print("加碼囉!! @%d" % (overweight_list[overweight_pz]))
             trigger_queue.put(1)
-            overweight_pz = searchQty()[1]  # 更新部位
+            overweight_pz += 1
 
         time.sleep(0.001)
 
@@ -255,7 +256,7 @@ def main():
                 print('下單結果:', s_order)
                 if s_order['Success'] == "OK":
                     print("下單成功")
-                trigger_queue.get(1)
+                    trigger_queue.get(1)
 
             time.sleep(0.001)
 
